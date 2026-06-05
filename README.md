@@ -87,7 +87,8 @@ These questions map directly onto the model families in DSA 8305: regression mod
 
 Before fitting any model, we examine the shape of the response variables. This is not optional housekeeping -- it is one of the most informative steps in the entire analysis.
 
-![Target Distributions](images/Target Variable Distributions and Normality Assessment.png)
+![Target Variable Distributions and Normality Assessment](images/Target%20Variable%20Distributions%20and%20Normality%20Assessment.png)
+
 
 Both Heating Load (Y1) and Cooling Load (Y2) show **bimodal distributions** -- two distinct humps rather than a single bell curve. The Shapiro-Wilk test formally rejects normality for both (p < 10^-20).
 
@@ -97,7 +98,8 @@ This finding has immediate implications. The normality assumption underpinning O
 
 ### Correlations and multicollinearity
 
-![Correlation Matrix](images/Feature Correlations with Target Variables.png)
+![Feature Correlations with Target Variables](images/Feature%20Correlations%20with%20Target%20Variables.png)
+
 
 The correlation matrix reveals a critical structural problem. X1 (Relative Compactness) and X2 (Surface Area) have a Pearson correlation of approximately -0.99 -- near-perfect negative correlation. X4 (Roof Area) is strongly correlated with both. This is not a data quality problem. It is a geometric reality: a more compact building occupies less surface area per unit of volume, and a building's roof area scales with its footprint, which is constrained by its compactness. The physics of building geometry creates the correlation.
 
@@ -107,7 +109,7 @@ X5 (Overall Height) stands out as the strongest individual predictor of both Y1 
 
 ### The shape of each relationship
 
-![Feature Scatter with LOWESS](images/Feature vs Heating Load.png)
+![Feature vs Heating Load](images/Feature%20vs%20Heating%20Load.png)
 
 Each panel shows one feature plotted against Heating Load, with points coloured by building height (blue = 3.5 m, orange = 7.0 m). The black curve is a **LOWESS smoother** (Locally Weighted Scatterplot Smoothing).
 
@@ -117,7 +119,7 @@ Several relationships stand out. X7 (Glazing Area) shows a clearly positive but 
 
 ### Quantifying the multicollinearity: VIF
 
-![VIF Chart](images/VIF by Feature.png)
+![VIF by Feature](images/VIF%20by%20Feature.png)
 
 The **Variance Inflation Factor** gives the correlation story a precise number. For predictor $j$, VIF is defined as:
 
@@ -159,8 +161,9 @@ OLS minimises the residual sum of squares to produce $\hat{\boldsymbol{\beta}} =
 
 OLS for Heating Load achieves R-squared = 0.914 on the training set. For Cooling Load, R-squared = 0.888. Both F-statistics are highly significant (p << 0.001), confirming the model as a whole is informative. But a high R-squared does not mean the model is well-specified. We must inspect the residuals.
 
-![OLS Diagnostics Y1](images/Heating OLS Diagnostics.png)
-![OLS Diagnostics Y2](images/Cooling OLS Diagnostics.png)
+
+![Cooling OLS Diagnostics](images/Cooling%20OLS%20Diagnostics.png)
+![Heating OLS Diagnostics](images/Heating%20OLS%20Diagnostics.png)
 
 **Reading the four diagnostic plots:**
 
@@ -188,7 +191,7 @@ The closed-form solution is $(X'X + \lambda I)^{-1}X'y$. The key insight is in t
 
 The regularisation parameter $\lambda$ (alpha in scikit-learn) controls the strength of the penalty. When $\lambda = 0$, Ridge reduces to OLS. As $\lambda \to \infty$, all coefficients are shrunk to zero and the model predicts the mean of Y regardless of X. The CV-optimal $\lambda$ sits between these extremes, trading a small amount of bias for a meaningful reduction in variance.
 
-![Ridge Coefficient Paths](images/Ridge Coefficient Paths.png)
+![Ridge Coefficient Paths](images/Ridge%20Coefficient%20Paths.png)
 
 The coefficient path plot is one of the most instructive visualisations in regularised regression. Each line tracks one predictor's coefficient as $\lambda$ increases from near-zero (left) to very large (right). At the left edge, coefficients take their OLS values -- large, unstable, and potentially sign-reversed due to collinearity. As $\lambda$ increases, the chaotic coefficients stabilise. The red dashed line marks the CV-optimal $\lambda$, where Ridge has resolved most of the instability without over-penalising genuinely important predictors.
 
@@ -202,11 +205,11 @@ PCR takes a geometrically different approach to the same multicollinearity probl
 
 The principal components are the eigenvectors of $X'X$, ordered by the amount of variance they explain. PC1 captures the largest source of variation in the feature space, PC2 the next largest, and so on. Because eigenvectors of a symmetric matrix are orthogonal, the components are uncorrelated by construction -- multicollinearity is geometrically eliminated.
 
-![PCA Scree and Cumulative Variance](images/PCA Scree Plot.png)
+![PCA Scree Plot](images/PCA%20Scree%20Plot.png)
 
 The scree plot shows each component's individual contribution to total variance. The cumulative variance plot shows how many components are needed to retain a given proportion of information. In our dataset, 6 components explain 96.3% of the variance in X -- the remaining components add little information and mostly capture noise from the one-hot encoded orientation dummies.
 
-![PCR CV RMSE](images/PCR Model Comparison.png)
+![PCR Model Comparison](images/PCR%20Model%20Comparison.png)
 
 Cross-validation selects 6 optimal components. PCR achieves test RMSE = 3.27 for Y1 -- slightly *worse* than OLS (2.72). This is an honest and instructive result. PCR is not guaranteed to outperform OLS. When the discarded components happen to contain signal relevant to Y (not just variance in X), dropping them hurts prediction. The lesson: **variance in X and covariance with Y are different things**. PCA optimises for the former; prediction requires the latter. Ridge, which retains all components but shrinks them proportionally to their contribution, is better suited to this dataset.
 
@@ -222,7 +225,7 @@ The model is non-linear in $x$ -- it can represent curves, inflection points, an
 
 The risk is **overfitting**. A degree-5 polynomial with 8 predictors and all interaction terms produces hundreds of features. Ridge regularisation is applied inside the pipeline to control this expansion.
 
-![Polynomial Degree Selection](images/Polynomial Regression.png)
+![Polynomial Regression](images/Polynomial%20Regression.png)
 
 CV-RMSE decreases steadily from degree 1 through degree 5. Degree 5 is optimal for both Y1 (RMSE = 1.60, R2 = 0.974) and Y2 (RMSE = 2.18, R2 = 0.949) -- a substantial improvement over OLS. The improvement confirms what the LOWESS plots suggested: non-linear relationships exist in this data, and they carry meaningful predictive signal.
 
@@ -238,7 +241,7 @@ $$s(x) = \sum_{j=1}^{K+4} \beta_j B_j(x)$$
 
 This converts a non-parametric problem back into OLS on an expanded feature matrix -- connecting splines directly to the linear models framework. The `patsy` library provides the `cr()` function for natural cubic spline basis expansion in Python.
 
-![Splines Bias-Variance Trade-off](images/Natural Cubic Splines.png)
+![Natural Cubic Splines](images/Natural%20Cubic%20Splines.png)
 
 The three panels show natural cubic splines fit to Glazing Area vs Heating Load with increasing degrees of freedom. The left panel (4 df) is too rigid and misses the curvature in the data -- high bias, low variance. The middle panel (7 df) follows the signal without chasing noise -- balanced bias-variance. The right panel (12 df) begins to fit individual noise structures in the data -- low bias, high variance, and the beginning of overfitting.
 
@@ -256,7 +259,7 @@ Each $s_j$ is estimated non-parametrically using penalised spline bases. The mod
 
 **Penalised splines and automatic smoothness selection:** Under the hood, `pygam` fits each $s_j$ using a spline basis with a penalty on the second derivative of the function. This penalty discourages rapid oscillation and controls smoothness automatically -- we do not need to manually choose degrees of freedom as we did for the splines in the previous section. The smoothness parameter is tuned by **Generalised Cross-Validation (GCV)**, printed in the model summary.
 
-![GAM Partial Dependence](images/GAM Partial Dependence Plots.png)
+![GAM Partial Dependence Plots](images/GAM%20Partial%20Dependence%20Plots.png)
 
 The partial dependence plots are among the most interpretable outputs in the entire study. Each panel shows the marginal effect of one predictor on Heating Load, holding all other predictors at their average values, with 95% confidence intervals shaded in blue.
 
@@ -294,8 +297,8 @@ Parameters are estimated by maximum likelihood. Logistic regression is a member 
 
 The corrected approach defines high/low load **within each height group** using group-specific medians. Now the classifier must use compactness, glazing, wall area, and roof configuration to distinguish efficient from inefficient buildings of the *same height*. This is the genuine classification problem.
 
-![Classification ROC, Confusion Matrix, Decision Tree](images/Classification Models Comparison.png)
-![Feature Importance](images/Feature Importance -- Decision Tree.png)
+![Classification Models Comparison](images/Classification%20Models%20Comparison.png)
+![Feature Importance -- Decision Tree](images/Feature%20Importance%20--%20Decision%20Tree.png)
 
 With the corrected labels, logistic regression achieves 83% accuracy and the decision tree achieves 91% accuracy. These are lower than the original 97% -- and that is the honest result. Multiple features now contribute meaningfully: Glazing Area (coefficient 2.01), Wall Area (1.90), and Roof Area (-1.01) are the strongest logistic regression predictors, which aligns perfectly with the GAM partial dependence plots.
 
@@ -305,7 +308,7 @@ The decision tree's confusion matrix shows a small number of misclassifications 
 
 ## Phase 5: Model Evaluation
 
-![Model Comparison Dashboard](images/Model Comparison Dashboard.png)
+![Model Comparison Dashboard](images/Model%20Comparison%20Dashboard.png)
 
 All regression models evaluated on the same held-out test set:
 
@@ -364,7 +367,8 @@ plt.show()
 Then create an `images/` folder in your repository, commit all the saved `.png` files, and reference them in your README using the relative path syntax:
 
 ```markdown
-![Target Distributions](images/Target Variable Distributions and Normality Assessment.png)
+![Target Variable Distributions and Normality Assessment](images/Target%20Variable%20Distributions%20and%20Normality%20Assessment.png)
+
 ```
 
 For this README, all plots were extracted directly from the notebook's embedded output data and saved to the `images/` folder. Going forward, add `savefig` calls to each plotting cell so the images persist independently of the notebook execution state.
@@ -406,3 +410,6 @@ For this README, all plots were extracted directly from the notebook's embedded 
 4. Dobson, A. J., and Barnett, A. G. (2018). *An Introduction to Generalized Linear Models* (4th ed.). Chapman and Hall/CRC.
 5. Wood, S. N. (2017). *Generalized Additive Models: An Introduction with R* (2nd ed.). Chapman and Hall/CRC.
 6. James, G., Witten, D., Hastie, T., and Tibshirani, R. (2021). *An Introduction to Statistical Learning* (2nd ed.). Springer.
+
+
+
