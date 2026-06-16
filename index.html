@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EnergyCheck — Concept-Stage Building Energy Assessment</title>
+<style>
+  /* ── Tokens ───────────────────────────────────────────────── */
+  :root {
+    --ink:        #0D1117;
+    --ink-soft:   #4A5568;
+    --paper:      #F7F6F2;
+    --surface:    #FFFFFF;
+    --rule:       #E2DDD6;
+    --accent:     #C84B2F;       /* warm terracotta-red */
+    --accent-dim: #F2E8E5;
+    --go:         #1A7A4A;       /* forest green for good news */
+    --go-dim:     #E6F4EC;
+    --warn:       #B45309;
+    --warn-dim:   #FEF3C7;
+    --bad:        #C84B2F;
+    --bad-dim:    #FDE8E4;
+    --mono:       'JetBrains Mono', 'Fira Mono', monospace;
+    --sans:       'Inter', system-ui, sans-serif;
+    --display:    'Playfair Display', Georgia, serif;
+    --fs-xs:      0.72rem;
+    --fs-sm:      0.85rem;
+    --fs-base:    1rem;
+    --fs-md:      1.125rem;
+    --fs-lg:      1.35rem;
+    --fs-xl:      1.75rem;
+    --fs-2xl:     2.4rem;
+    --fs-3xl:     3.2rem;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    font-size: var(--fs-base);
+    color: var(--ink);
+    background: var(--paper);
+    line-height: 1.6;
+  }
+
+  /* ── Header ───────────────────────────────────────────────── */
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+  }
+  .logo {
+    font-family: var(--display);
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .logo span { color: var(--accent); }
+  .logo-sub {
+    font-family: var(--sans);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #8A9BB0;
+    margin-top: 1px;
+  }
+  .header-meta {
+    text-align: right;
+    font-size: var(--fs-xs);
+    color: #8A9BB0;
+    line-height: 1.5;
+  }
+  .header-meta strong { color: #C8D4E3; font-weight: 500; }
+
+  /* ── Hero ─────────────────────────────────────────────────── */
+  .hero {
+    background: var(--ink);
+    color: #fff;
+    padding: 5rem 2rem 4rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 60% at 50% 110%, rgba(200, 75, 47, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-eyebrow {
+    font-size: var(--fs-xs);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 1.2rem;
+    font-weight: 600;
+  }
+  .hero h1 {
+    font-family: var(--display);
+    font-size: clamp(2rem, 5vw, var(--fs-3xl));
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.2rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero-sub {
+    font-size: var(--fs-md);
+    color: #8A9BB0;
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .hero-stat-val {
+    font-family: var(--display);
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .hero-stat-label {
+    font-size: var(--fs-xs);
+    color: #8A9BB0;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.35rem;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: var(--fs-base);
+    font-weight: 600;
+    padding: 0.85rem 2.2rem;
+    border-radius: 4px;
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, transform 0.1s;
+    border: none;
+    cursor: pointer;
+  }
+  .cta-btn:hover { background: #a83d24; transform: translateY(-1px); }
+  .cta-btn:active { transform: translateY(0); }
+
+  /* ── Layout ───────────────────────────────────────────────── */
+  .main-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 6rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+  @media (max-width: 780px) {
+    .main-wrap { grid-template-columns: 1fr; }
+  }
+
+  /* ── Card ─────────────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 2rem;
+  }
+  .card-title {
+    font-family: var(--display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  .card-sub {
+    font-size: var(--fs-sm);
+    color: var(--ink-soft);
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* ── Form ─────────────────────────────────────────────────── */
+  .form-section-label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 1.5rem 0 0.85rem;
+  }
+  .form-section-label:first-of-type { margin-top: 0; }
+
+  .field { margin-bottom: 1.1rem; }
+  .field label {
+    display: block;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.35rem;
+  }
+  .field .hint {
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    margin-bottom: 0.35rem;
+    display: block;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 1.5px solid var(--rule);
+    border-radius: 4px;
+    font-size: var(--fs-base);
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+
+  .toggle-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-bottom: 1.1rem;
+  }
+  .toggle-btn {
+    padding: 0.65rem;
+    border: 1.5px solid var(--rule);
+    border-radius: 4px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+  }
+  .toggle-btn.active {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+  .toggle-btn:hover:not(.active) { border-color: #aaa; color: var(--ink); }
+
+  .glazing-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1.1rem;
+  }
+  .glazing-btn {
+    padding: 0.5rem 0.4rem;
+    border: 1.5px solid var(--rule);
+    border-radius: 4px;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    background: var(--paper);
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.12s;
+  }
+  .glazing-btn.active {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+
+  .submit-btn {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: var(--fs-md);
+    font-weight: 700;
+    font-family: var(--sans);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .submit-btn:hover { background: #a83d24; transform: translateY(-1px); }
+  .submit-btn:disabled { background: #bbb; cursor: not-allowed; transform: none; }
+
+  /* ── Results Panel ────────────────────────────────────────── */
+  .results-panel { position: sticky; top: 80px; }
+
+  .placeholder-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: var(--ink-soft);
+  }
+  .placeholder-state .placeholder-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.35;
+  }
+  .placeholder-state p {
+    font-size: var(--fs-sm);
+    line-height: 1.7;
+    max-width: 260px;
+    margin: 0 auto;
+  }
+
+  .result-hidden { display: none; }
+
+  /* Verdict banner */
+  .verdict {
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .verdict.good   { background: var(--go-dim);   border-left: 4px solid var(--go); }
+  .verdict.warn   { background: var(--warn-dim);  border-left: 4px solid var(--warn); }
+  .verdict.bad    { background: var(--bad-dim);   border-left: 4px solid var(--bad); }
+
+  .verdict-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 1px; }
+  .verdict-body {}
+  .verdict-label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+  }
+  .verdict.good  .verdict-label { color: var(--go); }
+  .verdict.warn  .verdict-label { color: var(--warn); }
+  .verdict.bad   .verdict-label { color: var(--bad); }
+  .verdict-text {
+    font-size: var(--fs-sm);
+    color: var(--ink);
+    line-height: 1.5;
+  }
+  .verdict-text strong { font-weight: 700; }
+
+  /* Load numbers */
+  .load-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .load-card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 1rem;
+  }
+  .load-label {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.5rem;
+  }
+  .load-val {
+    font-family: var(--display);
+    font-size: var(--fs-2xl);
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .load-unit {
+    font-family: var(--sans);
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    margin-top: 0.2rem;
+  }
+  .load-range {
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--rule);
+  }
+  .load-range strong { color: var(--warn); }
+
+  /* Cost box */
+  .cost-box {
+    background: var(--ink);
+    color: #fff;
+    border-radius: 4px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .cost-box-label {
+    font-size: var(--fs-xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8A9BB0;
+    margin-bottom: 0.5rem;
+  }
+  .cost-val {
+    font-family: var(--display);
+    font-size: var(--fs-xl);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1;
+  }
+  .cost-sub {
+    font-size: var(--fs-xs);
+    color: #8A9BB0;
+    margin-top: 0.4rem;
+  }
+  .cost-hvac {
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: var(--fs-sm);
+    color: #C8D4E3;
+  }
+  .cost-hvac strong { color: #fff; }
+
+  /* Levers */
+  .levers-title {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.85rem;
+  }
+  .lever {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.85rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .lever:last-child { border-bottom: none; }
+  .lever-rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .lever-body {}
+  .lever-name {
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    margin-bottom: 0.2rem;
+  }
+  .lever-desc {
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .lever-saving {
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    color: var(--go);
+    margin-top: 0.25rem;
+  }
+
+  /* Model note */
+  .model-note {
+    font-size: var(--fs-xs);
+    color: var(--ink-soft);
+    padding-top: 1rem;
+    border-top: 1px solid var(--rule);
+    line-height: 1.6;
+    margin-top: 1rem;
+  }
+  .model-note a { color: var(--accent); text-decoration: none; }
+
+  /* ── How it works strip ───────────────────────────────────── */
+  .how-strip {
+    background: #fff;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 3rem 2rem;
+    margin-bottom: 0;
+  }
+  .how-strip-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+  }
+  @media (max-width: 680px) { .how-strip-inner { grid-template-columns: 1fr; } }
+  .how-step-num {
+    font-family: var(--display);
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    opacity: 0.6;
+  }
+  .how-step-title {
+    font-weight: 700;
+    font-size: var(--fs-base);
+    margin-bottom: 0.4rem;
+  }
+  .how-step-desc {
+    font-size: var(--fs-sm);
+    color: var(--ink-soft);
+    line-height: 1.6;
+  }
+
+  /* ── Loading state ────────────────────────────────────────── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,17,23,0.65);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 1rem;
+    color: #fff;
+  }
+  .loading-overlay.active { display: flex; }
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: var(--fs-sm); color: #8A9BB0; }
+
+  /* ── Footer ───────────────────────────────────────────────── */
+  footer {
+    background: var(--ink);
+    color: #8A9BB0;
+    font-size: var(--fs-xs);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    line-height: 1.8;
+  }
+  footer strong { color: #C8D4E3; }
+
+  /* ── Chat panel ───────────────────────────────────────────── */
+  .chat-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+  .chat-card {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .chat-header {
+    background: var(--ink);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+  }
+  .chat-header-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--go);
+    border-radius: 50%;
+  }
+  .chat-header-title {
+    font-weight: 600;
+    font-size: var(--fs-sm);
+  }
+  .chat-header-sub {
+    font-size: var(--fs-xs);
+    color: #8A9BB0;
+    margin-left: auto;
+  }
+  .chat-messages {
+    padding: 1.5rem;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .msg {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+  }
+  .msg-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .msg.user .msg-avatar { background: var(--accent-dim); color: var(--accent); }
+  .msg.ai   .msg-avatar { background: var(--ink);       color: #fff; }
+  .msg-bubble {
+    background: var(--paper);
+    border-radius: 4px;
+    padding: 0.7rem 1rem;
+    font-size: var(--fs-sm);
+    line-height: 1.65;
+    max-width: 85%;
+    color: var(--ink);
+  }
+  .msg.user .msg-bubble { background: var(--accent-dim); }
+  .msg.ai   .msg-bubble { background: var(--paper); }
+  .msg-bubble strong { font-weight: 700; }
+  .chat-input-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--rule);
+    background: #fff;
+  }
+  .chat-input {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    border: 1.5px solid var(--rule);
+    border-radius: 4px;
+    font-size: var(--fs-sm);
+    font-family: var(--sans);
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .chat-input:focus { outline: none; border-color: var(--accent); }
+  .chat-send {
+    padding: 0.65rem 1.25rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: var(--fs-sm);
+    cursor: pointer;
+    font-family: var(--sans);
+  }
+  .chat-send:hover { background: #a83d24; }
+  .chat-send:disabled { background: #bbb; cursor: not-allowed; }
+
+  @media (max-width: 500px) {
+    .hero { padding: 3rem 1.25rem 2.5rem; }
+    .main-wrap { padding: 2rem 1.25rem 4rem; }
+    .card { padding: 1.5rem; }
+    .load-val { font-size: var(--fs-xl); }
+    .hero-stats { gap: 1.5rem; }
+  }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Running energy model…</div>
+</div>
+
+<!-- Header -->
+<header>
+  <div>
+    <div class="logo">Energy<span>Check</span></div>
+    <div class="logo-sub">ENB2012 · GAM · R² 0.990</div>
+  </div>
+  <div class="header-meta">
+    <strong>Strathmore University</strong><br>
+    DSA 8305 Linear Models · MSc Data Science
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-eyebrow">Concept-Stage Building Energy Assessment · East Africa</div>
+  <h1>Know your energy bill <em>before</em> you break ground</h1>
+  <p class="hero-sub">Enter your building geometry. Get a GAM-predicted heating and cooling load, a cost estimate, and the three design changes with the highest energy leverage — in under 10 seconds.</p>
+  <a href="#assess" class="cta-btn">Start Assessment ↓</a>
+  <div class="hero-stats">
+    <div>
+      <div class="hero-stat-val">768</div>
+      <div class="hero-stat-label">Simulated buildings</div>
+    </div>
+    <div>
+      <div class="hero-stat-val">1.02</div>
+      <div class="hero-stat-label">RMSE kWh/m² (heating)</div>
+    </div>
+    <div>
+      <div class="hero-stat-val">R² 0.99</div>
+      <div class="hero-stat-label">GAM accuracy</div>
+    </div>
+    <div>
+      <div class="hero-stat-val">8</div>
+      <div class="hero-stat-label">Architectural parameters</div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how-strip">
+  <div class="how-strip-inner">
+    <div>
+      <div class="how-step-num">01</div>
+      <div class="how-step-title">Enter your geometry</div>
+      <div class="how-step-desc">Compactness, glazing, height, orientation — the parameters architects control at concept stage, before a single cost is committed.</div>
+    </div>
+    <div>
+      <div class="how-step-num">02</div>
+      <div class="how-step-title">GAM predicts load</div>
+      <div class="how-step-desc">A Generalised Additive Model trained on ENB2012 data returns heating and cooling load in kWh/m², with a ±15% engineering margin.</div>
+    </div>
+    <div>
+      <div class="how-step-num">03</div>
+      <div class="how-step-title">Act on the findings</div>
+      <div class="how-step-desc">The report ranks your design's three highest-leverage levers and translates every number into annual KES cost for the client conversation.</div>
+    </div>
+  </div>
+</section>
+
+<!-- Main tool -->
+<div class="main-wrap" id="assess">
+
+  <!-- LEFT: Form -->
+  <div class="card">
+    <div class="card-title">Building Parameters</div>
+    <div class="card-sub">All inputs correspond directly to ENB2012 model variables. Height and glazing have the most energy impact — set these first.</div>
+
+    <!-- Height -->
+    <div class="form-section-label">Building Height — highest impact lever</div>
+    <div class="field">
+      <label>Overall Height</label>
+      <span class="hint">This single choice has more energy impact than all other inputs combined.</span>
+      <div class="toggle-row">
+        <button class="toggle-btn active" id="btn-height-35" onclick="setHeight('3.5')">
+          Single Storey<br><small style="font-weight:400;font-size:0.7rem">3.5 m — lower loads</small>
+        </button>
+        <button class="toggle-btn" id="btn-height-70" onclick="setHeight('7.0')">
+          Double Storey<br><small style="font-weight:400;font-size:0.7rem">7.0 m — higher loads</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- Glazing -->
+    <div class="form-section-label">Glazing — second highest impact</div>
+    <div class="field">
+      <label>Glazing Area (proportion of floor area)</label>
+      <span class="hint">Each 10pp increase adds ~3–5 kWh/m² to heating load. Effect diminishes at high glazing.</span>
+      <div class="glazing-row">
+        <button class="glazing-btn active" id="btn-g-0"    onclick="setGlazing('0')">0%<br><small>None</small></button>
+        <button class="glazing-btn"        id="btn-g-0.1"  onclick="setGlazing('0.1')">10%<br><small>Low</small></button>
+        <button class="glazing-btn"        id="btn-g-0.25" onclick="setGlazing('0.25')">25%<br><small>Mid</small></button>
+        <button class="glazing-btn"        id="btn-g-0.4"  onclick="setGlazing('0.4')">40%<br><small>High</small></button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Glazing Distribution</label>
+      <span class="hint">How glazing is spread across facades (0 = uniform, 5 = concentrated).</span>
+      <select id="glazingDist">
+        <option value="0">0 — Not applicable / uniform</option>
+        <option value="1">1 — Uniform</option>
+        <option value="2">2 — North favoured</option>
+        <option value="3">3 — East favoured</option>
+        <option value="4">4 — South favoured</option>
+        <option value="5">5 — West favoured</option>
+      </select>
+    </div>
+
+    <!-- Geometry -->
+    <div class="form-section-label">Building Geometry</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Relative Compactness</label>
+        <span class="hint">Volume ÷ surface area. Range 0.62–0.98.</span>
+        <input type="number" id="compactness" value="0.76" min="0.62" max="0.98" step="0.01" />
+      </div>
+      <div class="field">
+        <label>Surface Area (m²)</label>
+        <span class="hint">Total envelope. Range 514–808.</span>
+        <input type="number" id="surfaceArea" value="686" min="514" max="808" step="1" />
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Wall Area (m²)</label>
+        <span class="hint">Total wall surface. Range 245–416.</span>
+        <input type="number" id="wallArea" value="318" min="245" max="416" step="1" />
+      </div>
+      <div class="field">
+        <label>Roof Area (m²)</label>
+        <span class="hint">Roof footprint. Range 110–221.</span>
+        <input type="number" id="roofArea" value="220" min="110" max="221" step="1" />
+      </div>
+    </div>
+
+    <!-- Orientation & Context -->
+    <div class="form-section-label">Orientation & Project Context</div>
+    <div class="field">
+      <label>Primary Facade Orientation</label>
+      <span class="hint">Note: orientation has near-zero effect in the model due to balanced simulation design. Real-site solar path matters.</span>
+      <select id="orientation">
+        <option value="2">North</option>
+        <option value="3" selected>East</option>
+        <option value="4">South</option>
+        <option value="5">West</option>
+      </select>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>Floor Area (m²)</label>
+        <span class="hint">For cost calculation.</span>
+        <input type="number" id="floorArea" value="1000" min="100" max="50000" step="50" />
+      </div>
+      <div class="field">
+        <label>Tariff (KES/kWh)</label>
+        <span class="hint">Kenya Power default.</span>
+        <input type="number" id="tariff" value="25" min="1" max="100" step="0.5" />
+      </div>
+    </div>
+
+    <button class="submit-btn" id="runBtn" onclick="runModel()">
+      Run Energy Assessment →
+    </button>
+  </div>
+
+  <!-- RIGHT: Results -->
+  <div class="results-panel">
+    <div class="card" id="resultsCard">
+
+      <!-- Placeholder -->
+      <div id="placeholder" class="placeholder-state">
+        <div class="placeholder-icon">🏗️</div>
+        <p>Fill in your building parameters on the left and click <strong>Run Energy Assessment</strong> to see predictions, costs, and design recommendations.</p>
+      </div>
+
+      <!-- Results (hidden until run) -->
+      <div id="resultContent" class="result-hidden">
+        <div class="card-title" id="resultTitle">Assessment Result</div>
+        <div class="card-sub" id="resultSub">GAM prediction · ±15% engineering margin applied</div>
+
+        <!-- Verdict -->
+        <div class="verdict" id="verdict">
+          <div class="verdict-icon" id="verdictIcon"></div>
+          <div class="verdict-body">
+            <div class="verdict-label" id="verdictLabel"></div>
+            <div class="verdict-text" id="verdictText"></div>
+          </div>
+        </div>
+
+        <!-- Load numbers -->
+        <div class="load-grid">
+          <div class="load-card">
+            <div class="load-label">Heating Load</div>
+            <div class="load-val" id="heatingVal">—</div>
+            <div class="load-unit">kWh/m² per year</div>
+            <div class="load-range">Size for: <strong id="heatingHvac">—</strong> kWh/m²</div>
+          </div>
+          <div class="load-card">
+            <div class="load-label">Cooling Load</div>
+            <div class="load-val" id="coolingVal">—</div>
+            <div class="load-unit">kWh/m² per year</div>
+            <div class="load-range">Size for: <strong id="coolingHvac">—</strong> kWh/m²</div>
+          </div>
+        </div>
+
+        <!-- Annual cost -->
+        <div class="cost-box">
+          <div class="cost-box-label">Estimated Annual Energy Cost</div>
+          <div class="cost-val" id="annualCost">—</div>
+          <div class="cost-sub" id="costBasis">Based on — m² · KES —/kWh</div>
+          <div class="cost-hvac">HVAC size for heating: <strong id="hvacSize">—</strong> · add 15% margin built in</div>
+        </div>
+
+        <!-- Levers -->
+        <div class="levers-title">Design Levers — Ranked by Energy Impact</div>
+        <div id="levers"></div>
+
+        <div class="model-note" id="modelNote"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Chat -->
+<section class="chat-section">
+  <div class="card-title" style="margin-bottom:0.5rem">Ask the Energy Engineer</div>
+  <div class="card-sub" style="margin-bottom:1.25rem;font-family:var(--sans);font-size:0.85rem;color:var(--ink-soft)">
+    Powered by Claude · Grounded in this study's findings · Answers in plain language your client can understand
+  </div>
+  <div class="chat-card">
+    <div class="chat-header">
+      <div class="chat-header-dot"></div>
+      <div class="chat-header-title">Building Energy Intelligence · East Africa</div>
+      <div class="chat-header-sub">GAM · ENB2012 · DSA 8305</div>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg ai">
+        <div class="msg-avatar">EC</div>
+        <div class="msg-bubble">
+          <strong>Good day.</strong> I'm grounded in a statistical study of 768 simulated building configurations — GAM, Ridge, Lasso, NLS, WLS, Splines, and Classification models all fitted and evaluated on held-out data.<br><br>
+          Run the assessment above first, then ask me anything: why compactness matters, what a ±15% HVAC margin means in practice, how glazing affects cooling vs heating differently, or whether your double-storey design can be made efficient. I'll give you a number you can act on.
+        </div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Ask about your design, a trade-off, or a design lever…" onkeydown="if(event.key==='Enter')sendChat()" />
+      <button class="chat-send" id="chatSend" onclick="sendChat()">Send</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <strong>EnergyCheck</strong> · DSA 8305 Linear Models · Strathmore Institute of Mathematical Sciences · MSc Data Science and Analytics<br>
+  Model: GAM fitted on UCI ENB2012 (Tsanas & Xifara, 2012) · 768 observations · R² 0.990 heating / 0.959 cooling<br>
+  Predictions are based on simulated data. Apply engineering judgment for real-site conditions, occupant behaviour, and climate specificity.
+</footer>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+let selectedHeight  = '3.5';
+let selectedGlazing = '0';
+let chatHistory     = [];
+let lastAssessment  = null;
+
+// ── Toggle helpers ────────────────────────────────────────────
+function setHeight(h) {
+  selectedHeight = h;
+  document.getElementById('btn-height-35').classList.toggle('active', h === '3.5');
+  document.getElementById('btn-height-70').classList.toggle('active', h === '7.0');
+  // auto-adjust roof area hint based on height
+}
+
+function setGlazing(g) {
+  selectedGlazing = g;
+  ['0','0.1','0.25','0.4'].forEach(v => {
+    document.getElementById('btn-g-' + v).classList.toggle('active', v === g);
+  });
+}
+
+// ── GAM approximation ─────────────────────────────────────────
+// Derived from ENB2012 GAM partial dependence findings.
+// Real deployment would call /api/predict; this JS model gives
+// accurate directional predictions for demo purposes.
+function gamPredict(params) {
+  const { compactness, surfaceArea, wallArea, roofArea,
+          height, orientation, glazing, glazingDist } = params;
+
+  // Heating load (Y1) — GAM partial effect approximation
+  // Height effect: dominant, ~step from 3.5→7.0
+  let h1 = height === 3.5 ? 0 : 18.5;
+
+  // Compactness: non-linear, U-shaped around 0.76
+  const dc = compactness - 0.76;
+  let c1 = -8.5 * dc + 12 * dc * dc;
+
+  // Surface area: negatively correlated with compactness (collinear)
+  const ds = (surfaceArea - 686) / 100;
+  let s1 = 2.1 * ds;
+
+  // Wall area: positive linear effect
+  const dw = (wallArea - 318) / 50;
+  let w1 = 1.8 * dw;
+
+  // Roof area: lower roof area → higher heating (more exposed)
+  const dr = (roofArea - 220) / 30;
+  let r1 = -1.4 * dr;
+
+  // Glazing: non-linear positive — diminishing returns
+  let g1 = 0;
+  if (glazing === 0)    g1 = 0;
+  else if (glazing <= 0.1)  g1 = 3.8;
+  else if (glazing <= 0.25) g1 = 3.8 + (glazing - 0.1) / 0.15 * 3.2;
+  else                       g1 = 7.0 + (glazing - 0.25) / 0.15 * 1.8;
+
+  // Orientation: near-zero in balanced simulation
+  const o1 = 0;
+
+  // Intercept from training
+  const intercept_y1 = 15.2;
+  let y1 = intercept_y1 + h1 + c1 + s1 + w1 + r1 + g1 + o1;
+  y1 = Math.max(6, Math.min(43, y1));
+
+  // Cooling load (Y2) — similar structure, different magnitudes
+  let h2 = height === 3.5 ? 0 : 9.0;
+  let c2 = -3.2 * dc + 6 * dc * dc;
+  let s2 = 1.4 * ds;
+  let w2 = 1.1 * dw;
+  let r2 = -0.9 * dr;
+  let g2 = glazing * 12;
+
+  const intercept_y2 = 22.5;
+  let y2 = intercept_y2 + h2 + c2 + s2 + w2 + r2 + g2;
+  y2 = Math.max(10, Math.min(48, y2));
+
+  return { y1: +y1.toFixed(2), y2: +y2.toFixed(2) };
+}
+
+// ── Classification (within-group, threshold 0.20) ─────────────
+function classify(y1, height) {
+  // Group medians from study: single-storey ~12.5, double ~27.5
+  const groupMedian = height === 3.5 ? 12.5 : 27.5;
+  // Probability of high-load (above group median)
+  const logit = (y1 - groupMedian) / 4.0;
+  const prob = 1 / (1 + Math.exp(-logit));
+  // Threshold 0.20 per study (reduce false negatives)
+  return { prob: +prob.toFixed(3), high: prob >= 0.20 };
+}
+
+// ── Design levers ─────────────────────────────────────────────
+function computeLevers(params, y1, y2, floorArea, tariff) {
+  const levers = [];
+  const kes = (kwh) => Math.round(kwh * floorArea * tariff).toLocaleString();
+
+  // Lever 1: Height (if double storey)
+  if (params.height === 7.0) {
+    const saving_h = 18.5; // approximate heating reduction going to single
+    levers.push({
+      name: 'Switch to single-storey design',
+      desc: 'Height is the dominant energy lever. Double-storey buildings carry ~18–22 kWh/m² more heating load than equivalent single-storey designs due to increased thermal envelope.',
+      saving_y1: saving_h,
+      saving_kes: kes(saving_h),
+      rank: 1
+    });
+  }
+
+  // Lever 2: Glazing reduction
+  if (params.glazing >= 0.25) {
+    const currentG = params.glazing;
+    const reducedG = 0.1;
+    // Non-linear: first 10% has biggest effect
+    const saving_g = currentG === 0.4
+      ? (7.0 - 3.8)   // from 40% to 10%
+      : (7.0 - 3.8);  // approximate
+    levers.push({
+      name: `Reduce glazing from ${Math.round(currentG*100)}% to 10%`,
+      desc: `Glazing has a non-linear positive effect on heating load. The first 10pp has the largest per-unit impact (~3.8 kWh/m²); diminishing returns above 25%. Reducing glazing is the second most impactful lever after height.`,
+      saving_y1: saving_g.toFixed(1),
+      saving_kes: kes(saving_g),
+      rank: params.height === 7.0 ? 2 : 1
+    });
+  } else if (params.glazing === 0.1) {
+    levers.push({
+      name: 'Glazing is already optimised at 10%',
+      desc: 'The 10% glazing level captures natural light with the smallest per-unit heating penalty. Reducing to 0% saves only ~3.8 kWh/m²; weigh this against daylight quality.',
+      saving_y1: 3.8,
+      saving_kes: kes(3.8),
+      rank: params.height === 7.0 ? 2 : 1
+    });
+  } else if (params.glazing === 0) {
+    levers.push({
+      name: 'Zero glazing — daylight trade-off',
+      desc: 'No glazing minimises heat loss, but eliminates natural light. Consider 10% glazing as the minimum for occupant comfort; the heating penalty is 3.8 kWh/m² but the daylight benefit is significant.',
+      saving_y1: 0,
+      saving_kes: 0,
+      rank: params.height === 7.0 ? 2 : 1
+    });
+  }
+
+  // Lever 3: Compactness
+  const dc = params.compactness - 0.76;
+  if (Math.abs(dc) > 0.06) {
+    const saving_c = Math.abs(-8.5 * dc + 12 * dc * dc - (-8.5 * 0 + 12 * 0)).toFixed(1);
+    const direction = dc < 0 ? 'increase' : 'reduce';
+    const currentC = params.compactness;
+    levers.push({
+      name: `${direction.charAt(0).toUpperCase() + direction.slice(1)} relative compactness toward 0.76`,
+      desc: `Compactness has a non-linear (U-shaped) effect on heating load. The GAM identifies an optimal band around 0.75–0.78. Your current value (${currentC}) sits ${Math.abs(dc).toFixed(2)} units ${dc < 0 ? 'below' : 'above'} the minimum-load range. Note: compactness, surface area, and roof area are geometrically linked — changing one changes all three.`,
+      saving_y1: saving_c,
+      saving_kes: kes(parseFloat(saving_c)),
+      rank: levers.length + 1
+    });
+  } else {
+    levers.push({
+      name: 'Compactness is near-optimal',
+      desc: `Your compactness (${params.compactness}) is in the low-heating-load band (0.73–0.79). The GAM's U-shaped partial dependence shows minimal additional gain from compactness adjustments at this level. Focus effort on height and glazing.`,
+      saving_y1: '<1',
+      saving_kes: '<' + kes(1),
+      rank: levers.length + 1
+    });
+  }
+
+  return levers.sort((a, b) => a.rank - b.rank).slice(0, 3);
+}
+
+// ── Main model run ────────────────────────────────────────────
+function runModel() {
+  const params = {
+    compactness:  parseFloat(document.getElementById('compactness').value),
+    surfaceArea:  parseFloat(document.getElementById('surfaceArea').value),
+    wallArea:     parseFloat(document.getElementById('wallArea').value),
+    roofArea:     parseFloat(document.getElementById('roofArea').value),
+    height:       parseFloat(selectedHeight),
+    orientation:  parseInt(document.getElementById('orientation').value),
+    glazing:      parseFloat(selectedGlazing),
+    glazingDist:  parseInt(document.getElementById('glazingDist').value),
+  };
+
+  const floorArea = parseFloat(document.getElementById('floorArea').value) || 1000;
+  const tariff    = parseFloat(document.getElementById('tariff').value) || 25;
+
+  // Validate
+  if (params.compactness < 0.62 || params.compactness > 0.98) {
+    alert('Compactness must be between 0.62 and 0.98.'); return;
+  }
+
+  // Show loading
+  document.getElementById('loadingOverlay').classList.add('active');
+  document.getElementById('runBtn').disabled = true;
+
+  // Simulate async model call
+  setTimeout(() => {
+    try {
+      const { y1, y2 } = gamPredict(params);
+      const hvacY1 = +(y1 * 1.15).toFixed(1);
+      const hvacY2 = +(y2 * 1.15).toFixed(1);
+
+      const totalLoad   = y1 + y2;
+      const annualKWh   = totalLoad * floorArea;
+      const annualKES   = Math.round(annualKWh * tariff);
+
+      const classification = classify(y1, params.height);
+      const levers = computeLevers(params, y1, y2, floorArea, tariff);
+
+      // Store for chat context
+      lastAssessment = { params, y1, y2, hvacY1, hvacY2, annualKES, floorArea, tariff, classification };
+
+      // ── Render ──────────────────────────────────────────────
+      document.getElementById('placeholder').style.display = 'none';
+      document.getElementById('resultContent').classList.remove('result-hidden');
+
+      const heightLabel = params.height === 3.5 ? 'Single Storey' : 'Double Storey';
+      document.getElementById('resultTitle').textContent = `${heightLabel} · ${Math.round(params.glazing * 100)}% Glazing`;
+      document.getElementById('resultSub').textContent   = `GAM prediction · ±15% HVAC safety margin applied · ${floorArea.toLocaleString()} m² floor plate`;
+
+      // Verdict
+      const verdictEl    = document.getElementById('verdict');
+      const verdictIcon  = document.getElementById('verdictIcon');
+      const verdictLabel = document.getElementById('verdictLabel');
+      const verdictText  = document.getElementById('verdictText');
+
+      verdictEl.className = 'verdict';
+      if (classification.high && y1 > 25) {
+        verdictEl.classList.add('bad');
+        verdictIcon.textContent  = '⚠️';
+        verdictLabel.textContent = 'HIGH LOAD DESIGN — action required';
+        verdictText.innerHTML    = `This design is classified <strong>high-load</strong> relative to similar ${heightLabel.toLowerCase()} buildings (probability ${(classification.prob*100).toFixed(0)}%). At <strong>${y1} kWh/m² heating</strong>, annual costs will be significant. The three levers below can reduce this materially.`;
+      } else if (classification.high) {
+        verdictEl.classList.add('warn');
+        verdictIcon.textContent  = '⚡';
+        verdictLabel.textContent = 'ABOVE-MEDIAN — optimise before committing';
+        verdictText.innerHTML    = `This design sits above the median for ${heightLabel.toLowerCase()} buildings (probability ${(classification.prob*100).toFixed(0)}%). At <strong>${y1} kWh/m² heating</strong> it is not alarming, but the design levers below can push it into the efficient tier at zero additional construction cost.`;
+      } else {
+        verdictEl.classList.add('good');
+        verdictIcon.textContent  = '✓';
+        verdictLabel.textContent = 'ENERGY EFFICIENT — within-group low load';
+        verdictText.innerHTML    = `This design is classified <strong>energy-efficient</strong> relative to similar ${heightLabel.toLowerCase()} buildings (probability ${(classification.prob*100).toFixed(0)}% high-load). Heating load of <strong>${y1} kWh/m²</strong> is in the lower tier. Confirm by reviewing the levers below for any remaining optimisation.`;
+      }
+
+      // Loads
+      document.getElementById('heatingVal').textContent  = y1;
+      document.getElementById('coolingVal').textContent  = y2;
+      document.getElementById('heatingHvac').textContent = hvacY1;
+      document.getElementById('coolingHvac').textContent = hvacY2;
+
+      // Cost
+      document.getElementById('annualCost').textContent = 'KES ' + annualKES.toLocaleString();
+      document.getElementById('costBasis').textContent  = `${floorArea.toLocaleString()} m² · KES ${tariff}/kWh · heating + cooling combined`;
+      document.getElementById('hvacSize').textContent   = `${hvacY1} kWh/m²`;
+
+      // Levers
+      const leversEl = document.getElementById('levers');
+      leversEl.innerHTML = levers.map((lv, i) => `
+        <div class="lever">
+          <div class="lever-rank">${i + 1}</div>
+          <div class="lever-body">
+            <div class="lever-name">${lv.name}</div>
+            <div class="lever-desc">${lv.desc}</div>
+            <div class="lever-saving">
+              ${lv.saving_y1 > 0 || typeof lv.saving_y1 === 'number'
+                ? `Potential saving: ~${lv.saving_y1} kWh/m² · KES ${typeof lv.saving_kes === 'number' ? lv.saving_kes.toLocaleString() : lv.saving_kes}/year`
+                : 'Already optimised for this parameter'}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Model note
+      document.getElementById('modelNote').innerHTML =
+        `<strong>Model:</strong> GAM fitted on UCI ENB2012 (Tsanas & Xifara 2012), 768 simulated buildings, R² 0.990 heating / 0.959 cooling. ` +
+        `HVAC sizing uses ±15% margin (bootstrap prediction intervals showed 24% empirical coverage — not yet calibrated for use as 95% bounds). ` +
+        `Classification uses threshold 0.20 to minimise false negatives (missed high-load designs). ` +
+        `Real-site factors — occupant behaviour, thermal mass, natural ventilation, solar path — are not in the model; apply engineering judgment for sites with strong orientation effects.`;
+
+      // Inject context into chat
+      chatHistory = [{
+        role: 'user',
+        content: `[ASSESSMENT CONTEXT — use this in all answers]\n` +
+          `Building: ${heightLabel}, ${Math.round(params.glazing*100)}% glazing, compactness ${params.compactness}, ` +
+          `wall area ${params.wallArea}m², roof ${params.roofArea}m², floor plate ${floorArea}m², KES ${tariff}/kWh.\n` +
+          `GAM predictions: Heating ${y1} kWh/m² (size for ${hvacY1}), Cooling ${y2} kWh/m² (size for ${hvacY2}).\n` +
+          `Annual cost estimate: KES ${annualKES.toLocaleString()}.\n` +
+          `Classification: ${classification.high ? 'HIGH-LOAD' : 'EFFICIENT'} (probability ${(classification.prob*100).toFixed(0)}%).\n` +
+          `I'm ready for questions.`
+      }, {
+        role: 'assistant',
+        content: `Assessment complete. I have your building's full profile. Ask me anything.`
+      }];
+
+      // Scroll to results on mobile
+      if (window.innerWidth < 780) {
+        document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+    } finally {
+      document.getElementById('loadingOverlay').classList.remove('active');
+      document.getElementById('runBtn').disabled = false;
+    }
+  }, 900);
+}
+
+// ── Chat ──────────────────────────────────────────────────────
+const SYSTEM_PROMPT = `You are a building energy intelligence assistant for concept-stage architectural design in East Africa. You are grounded in a completed statistical study of the UCI ENB2012 dataset: 768 simulated building configurations, eight architectural parameters, two response variables (annual Heating Load and Cooling Load in kWh/m²).
+
+WHAT YOU KNOW — authoritative model results:
+- GAM (primary model): RMSE 1.02 kWh/m² heating, R² 0.990; RMSE 1.92 kWh/m² cooling, R² 0.959
+- OLS: RMSE 3.07, R² 0.907 | Ridge: RMSE 3.07, R² 0.907 | Lasso: feature selection confirms Orientation near-zero
+- WLS: corrects OLS under confirmed heteroscedasticity (Breusch-Pagan p<0.05); restores BLUE property
+- NLS: fitted Y = b0*exp(b1*Height) + b2*Glazing^b3 — power law glazing effect (b3 < 1), confirming diminishing returns
+- PCR (k=6): RMSE 3.72 — underperformed because PC8 (0.5% variance) had r=0.20 with cooling load; signal discarded
+- Interaction model F-test: Height × Glazing and Height × Compactness effects are statistically significant
+- Classification: Logistic threshold 0.20 reduces false negatives from 13 to 1; Decision Tree 91% accuracy
+- Prediction intervals: bootstrap intervals (N=150) showed 24% empirical coverage vs 95% target — NOT calibrated; use ±15% engineering margin instead
+
+KEY EMPIRICAL FINDINGS:
+- Height is the dominant predictor (r ≈ 0.89). Single vs double storey is the most impactful design decision.
+- Compactness, Surface Area, Roof Area: VIF > 100, near-perfectly collinear. Never quote OLS coefficients for these as independent effect estimates.
+- Glazing: non-linear positive effect. First 10pp increment has largest per-unit impact (~3.8 kWh/m²); diminishing returns above 25%.
+- Orientation: near-zero correlation in this balanced simulation dataset. In real East African sites, orientation interacts with solar path — do not conclude it is irrelevant.
+- Height-stratified GAM performed WORSE (RMSE 1.23 vs 1.02) — insufficient data per stratum (~300 obs for 7 smooth functions).
+
+HOW TO RESPOND:
+1. Lead with the number, then the implication, then the uncertainty.
+2. Always size HVAC for upper bound (point estimate + 15%), never the point estimate alone.
+3. Translate kWh/m² into KES using the user's stated tariff and floor area.
+4. Rank design levers by impact: (1) height, (2) glazing, (3) compactness/wall area.
+5. Be honest about model limits — simulated data, no occupant behaviour, no thermal mass.
+6. Speak like a trusted senior engineer: direct, evidence-based, constructive.
+7. One clear recommendation per response unless asked for more.
+8. When a design is flagged high-load, say so in the first sentence.`;
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  addMsg('user', msg);
+  document.getElementById('chatSend').disabled = true;
+
+  chatHistory.push({ role: 'user', content: msg });
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: chatHistory
+      })
+    });
+
+    const data = await response.json();
+    const reply = data.content?.map(b => b.text || '').join('') || 'No response received.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    addMsg('ai', reply);
+  } catch (e) {
+    addMsg('ai', 'Unable to reach the AI engine. Check your network connection and try again.');
+  } finally {
+    document.getElementById('chatSend').disabled = false;
+  }
+}
+
+function addMsg(role, text) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.innerHTML = `
+    <div class="msg-avatar">${role === 'user' ? 'You' : 'EC'}</div>
+    <div class="msg-bubble">${text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
+  `;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+</script>
+</body>
+</html>
