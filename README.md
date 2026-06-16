@@ -375,12 +375,37 @@ For this README, all plots were extracted directly from the notebook's embedded 
 
 ---
 
+
+## Analytical Improvements (v2)
+
+This version of the notebook incorporates six improvements over the original submission:
+
+### 1. Height × Feature Interaction Models (Section 4.6b)
+The original additive GAM averaged feature effects across both height groups. Height-stratified GAMs are now fitted separately for single-storey and double-storey buildings. Diverging partial dependence curves across height groups reveal genuine interaction effects — particularly for Relative Compactness and Glazing Area.
+
+### 2. Bootstrapped Prediction Intervals (Section 4.6c)
+The original analysis produced only point predictions. Bootstrapped 95% prediction intervals (N=150 resamples) are now generated for the GAM, providing empirical coverage estimates and per-observation uncertainty bounds. This makes the output deployment-ready: HVAC engineers can size systems to the upper bound rather than the point estimate.
+
+### 3. PCR Component Signal Diagnostic (after Section 4.3)
+A new diagnostic plot shows the correlation between each principal component and Y1/Y2, alongside the variance each component explains in X. This provides empirical evidence for the theoretical claim that PCR discards components carrying signal for Y — which explains PCR's underperformance relative to Ridge in this dataset.
+
+### 4. OLS Singular Eigenvalue Warning Explained (Section 4.1)
+The `statsmodels` singular eigenvalue warning is now explicitly addressed in a dedicated markdown cell, explaining why OLS predictions remain valid despite near-singular X'X, and why individual coefficients for the collinear cluster must not be interpreted.
+
+### 5. Precision-Recall Threshold Optimisation (Section 7.3)
+The classification analysis now includes a precision-recall curve and a principled threshold selection procedure that accounts for the cost asymmetry in building design (false negatives = under-specified HVAC). An adjusted threshold minimising false negatives subject to a precision floor is computed and compared against the default 0.5 threshold.
+
+### 6. README Filename Correction
+The notebook filename referenced in this README has been corrected to match the actual file (`Energy_Efficiency_Improved.ipynb`).
+
+---
+
 ## Repository Structure
 
 ```
 .
 ├── README.md                              -- This file
-├── Energy_Efficiency_Analysis_Improved.ipynb  -- Main analysis notebook
+├── Energy_Efficiency_Improved.ipynb  -- Main analysis notebook
 ├── ENB2012_data 2.xlsx                    -- Dataset
 └── images/
     ├── Target Variable Distributions and Normality Assessment.png
@@ -397,7 +422,11 @@ For this README, all plots were extracted directly from the notebook's embedded 
     ├── GAM Partial Dependence Plots.png
     ├── Classification Models Comparison.png
     ├── Feature Importance -- Decision Tree.png
-    └── Model Comparison Dashboard.png
+    ├── Model Comparison Dashboard.png
+    ├── PCR_Component_Diagnostic.png
+    ├── GAM_Interaction_By_Height.png
+    ├── GAM_Prediction_Intervals.png
+    └── PR_Threshold_Optimisation.png
 ```
 
 ---
@@ -410,6 +439,3 @@ For this README, all plots were extracted directly from the notebook's embedded 
 4. Dobson, A. J., and Barnett, A. G. (2018). *An Introduction to Generalized Linear Models* (4th ed.). Chapman and Hall/CRC.
 5. Wood, S. N. (2017). *Generalized Additive Models: An Introduction with R* (2nd ed.). Chapman and Hall/CRC.
 6. James, G., Witten, D., Hastie, T., and Tibshirani, R. (2021). *An Introduction to Statistical Learning* (2nd ed.). Springer.
-
-
-
