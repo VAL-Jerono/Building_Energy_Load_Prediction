@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,6 +179,16 @@ header {
 .submit-btn:hover { background: #a83d24; transform: translateY(-1px); }
 .submit-btn:disabled { background: #bbb; cursor: not-allowed; transform: none; }
 
+/* ---- Tariff presets ---- */
+.tariff-presets { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.tariff-preset {
+  font-size: var(--fs-xs); padding: 0.3rem 0.65rem;
+  background: var(--paper); border: 1px solid var(--rule);
+  border-radius: 20px; cursor: pointer; color: var(--ink-soft);
+  font-family: var(--sans); font-weight: 600; transition: all 0.12s;
+}
+.tariff-preset:hover, .tariff-preset.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
 /* ---- Results ---- */
 .results-panel { position: sticky; top: 112px; }
 .placeholder-state { text-align: center; padding: 2.5rem 1.5rem; color: var(--ink-soft); }
@@ -226,6 +235,18 @@ header {
 
 .model-note { font-size: var(--fs-xs); color: var(--ink-soft); padding-top: 0.85rem; border-top: 1px solid var(--rule); line-height: 1.6; margin-top: 0.85rem; }
 
+/* ---- Result action buttons ---- */
+.result-actions { display: flex; gap: 0.65rem; margin-bottom: 1.25rem; }
+.result-action-btn {
+  flex: 1; padding: 0.6rem 0.5rem; border: 1.5px solid var(--rule); border-radius: 4px;
+  font-size: var(--fs-xs); font-weight: 700; font-family: var(--sans);
+  background: var(--paper); color: var(--ink-soft); cursor: pointer;
+  text-align: center; transition: all 0.12s; display: flex; align-items: center;
+  justify-content: center; gap: 0.3rem;
+}
+.result-action-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.result-action-btn.copied { border-color: var(--go); color: var(--go); background: var(--go-dim); }
+
 /* ---- Loading ---- */
 .loading-overlay {
   display: none; position: fixed; inset: 0;
@@ -237,6 +258,27 @@ header {
 .spinner { width: 36px; height: 36px; border: 3px solid rgba(255,255,255,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .loading-text { font-size: var(--fs-sm); color: #8A9BB0; }
+
+/* ---- API Key banner ---- */
+.api-key-banner {
+  background: var(--warn-dim); border: 1px solid #FCD34D; border-radius: var(--radius);
+  padding: 0.85rem 1.25rem; margin-bottom: 1.25rem; font-size: var(--fs-sm);
+  display: flex; gap: 0.75rem; align-items: flex-start;
+}
+.api-key-banner.hidden { display: none; }
+.api-key-banner p { color: var(--ink); line-height: 1.5; flex: 1; }
+.api-key-input-row { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.api-key-input-row input {
+  flex: 1; padding: 0.45rem 0.7rem; border: 1.5px solid #FCD34D;
+  border-radius: 4px; font-size: var(--fs-xs); font-family: var(--mono);
+  background: #fff; color: var(--ink);
+}
+.api-key-input-row input:focus { outline: none; border-color: var(--warn); }
+.api-key-save-btn {
+  padding: 0.45rem 0.9rem; background: var(--warn); color: #fff;
+  border: none; border-radius: 4px; font-size: var(--fs-xs); font-weight: 700;
+  cursor: pointer; font-family: var(--sans); white-space: nowrap;
+}
 
 /* ---- Chat ---- */
 .chat-wrap { max-width: 900px; margin: 0 auto; padding: 2rem 2rem 5rem; }
@@ -353,6 +395,17 @@ header {
 footer { background: var(--ink); color: #8A9BB0; font-size: var(--fs-xs); padding: 1.5rem 2rem; text-align: center; line-height: 1.9; }
 footer strong { color: #C8D4E3; }
 
+/* ---- Print / PDF styles ---- */
+@media print {
+  header, .tab-nav, .results-panel .card .result-actions,
+  .submit-btn, footer, .model-note { display: none !important; }
+  body { background: #fff; font-size: 11pt; }
+  .main-wrap { display: block; padding: 0; }
+  .card { border: none; padding: 0; box-shadow: none; }
+  .load-val { font-size: 1.6rem; }
+  .cost-box { background: #1a1a2e; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 520px) {
   .hero { padding: 2.5rem 1.25rem 2rem; }
@@ -411,16 +464,16 @@ footer strong { color: #C8D4E3; }
 <!-- Tab Nav -->
 <nav class="tab-nav" role="tablist">
   <button class="tab-btn active" role="tab" onclick="switchTab('assess', this)">
-    <span class="tab-icon"> </span> Assessment
+    <span class="tab-icon">🏗</span> Assessment
   </button>
   <button class="tab-btn" role="tab" onclick="switchTab('chat', this)">
-    <span class="tab-icon"> </span> Ask the Engineer
+    <span class="tab-icon">💬</span> Ask the Engineer
   </button>
   <button class="tab-btn" role="tab" onclick="switchTab('study', this)">
-    <span class="tab-icon"> </span> Study Results
+    <span class="tab-icon">📊</span> Study Results
   </button>
   <button class="tab-btn" role="tab" onclick="switchTab('about', this)">
-    <span class="tab-icon"> </span> About
+    <span class="tab-icon">ℹ️</span> About
   </button>
 </nav>
 
@@ -509,17 +562,22 @@ footer strong { color: #C8D4E3; }
           <option value="5">West</option>
         </select>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Floor Area (m²)</label>
-          <span class="hint">For KES cost calculation.</span>
-          <input type="number" id="floorArea" value="1000" min="100" max="50000" step="50" />
+
+      <div class="field">
+        <label>Floor Area (m²)</label>
+        <span class="hint">For KES cost calculation.</span>
+        <input type="number" id="floorArea" value="1000" min="100" max="50000" step="50" />
+      </div>
+
+      <div class="field">
+        <label>Electricity Tariff</label>
+        <div class="tariff-presets" id="tariffPresets">
+          <button class="tariff-preset active" onclick="setTariff(25, this)">Kenya Power Residential (KES 25)</button>
+          <button class="tariff-preset"        onclick="setTariff(28, this)">Kenya Power Commercial (KES 28)</button>
+          <button class="tariff-preset"        onclick="setTariff(18, this)">Solar + Grid (KES 18)</button>
+          <button class="tariff-preset"        onclick="setTariff(0,  this)">Custom</button>
         </div>
-        <div class="field">
-          <label>Tariff (KES/kWh)</label>
-          <span class="hint">Kenya Power default.</span>
-          <input type="number" id="tariff" value="25" min="1" max="100" step="0.5" />
-        </div>
+        <input type="number" id="tariff" value="25" min="1" max="100" step="0.5" style="margin-top:0.4rem" placeholder="KES/kWh" />
       </div>
 
       <button class="submit-btn" id="runBtn" onclick="runModel()">Run Energy Assessment</button>
@@ -535,6 +593,16 @@ footer strong { color: #C8D4E3; }
         <div id="resultContent" class="result-hidden">
           <div class="card-title" id="resultTitle">Assessment Result</div>
           <div class="card-sub" id="resultSub">GAM prediction · ±15% HVAC safety margin applied</div>
+
+          <!-- Action buttons -->
+          <div class="result-actions">
+            <button class="result-action-btn" id="exportPdfBtn" onclick="exportPDF()">
+              🖨 Export PDF
+            </button>
+            <button class="result-action-btn" id="shareBtn" onclick="shareAssessment()">
+              🔗 Copy Share Link
+            </button>
+          </div>
 
           <div class="verdict" id="verdict">
             <div class="verdict-icon" id="verdictIcon"></div>
@@ -582,18 +650,30 @@ footer strong { color: #C8D4E3; }
   <div class="chat-wrap">
     <div style="margin-bottom:1.25rem">
       <div class="card-title">Ask the Energy Engineer</div>
-      <p style="font-size:var(--fs-sm);color:var(--ink-soft);margin-top:0.3rem">Powered by Claude · Grounded in this study's GAM and classification findings · Answers in plain language your client can understand</p>
+      <p style="font-size:var(--fs-sm);color:var(--ink-soft);margin-top:0.3rem">Powered by Groq (Llama 3.3 70B) · Grounded in this study's GAM and classification findings · Answers in plain language your client can understand</p>
+    </div>
+
+    <!-- API Key entry -->
+    <div class="api-key-banner" id="apiKeyBanner">
+      <div style="font-size:1.3rem;flex-shrink:0">🔑</div>
+      <div style="flex:1">
+        <p><strong>Enter your Groq API key to enable the chat assistant.</strong> Get a free key at <a href="https://console.groq.com" target="_blank" style="color:var(--warn);font-weight:600">console.groq.com</a>. Your key stays in this browser session only and is never stored.</p>
+        <div class="api-key-input-row">
+          <input type="password" id="groqKeyInput" placeholder="gsk_..." />
+          <button class="api-key-save-btn" onclick="saveGroqKey()">Save Key</button>
+        </div>
+      </div>
     </div>
 
     <div class="chat-card">
       <div class="chat-header">
-        <div class="chat-header-dot"></div>
+        <div class="chat-header-dot" id="chatStatusDot" style="background:#8A9BB0"></div>
         <div class="chat-header-title">Building Energy Intelligence · East Africa</div>
         <div class="chat-header-sub">GAM · ENB2012 · DSA 8305</div>
       </div>
 
       <div class="chat-context-bar" id="chatContextBar">
-        <span>⚡</span>
+        <span>📐</span>
         <span id="chatContextLabel">Assessment context loaded -- responses will reference your building.</span>
       </div>
 
@@ -602,7 +682,7 @@ footer strong { color: #C8D4E3; }
           <div class="msg-avatar">EC</div>
           <div class="msg-bubble">
             <strong>Good day.</strong> I am grounded in a statistical study of 768 simulated building configurations -- GAM, Ridge, Lasso, NLS, WLS, Splines, and Classification models all fitted and evaluated on held-out data.<br><br>
-            Run the assessment first (Assessment tab), then ask me anything: why compactness matters, what a 15% HVAC margin means in practice, how glazing affects cooling versus heating differently, or whether your double-storey design can be made efficient. I will give you a number you can act on.
+            Enter your Groq API key above, then run an assessment (Assessment tab) and ask me anything: why compactness matters, what a 15% HVAC margin means in practice, how glazing affects cooling versus heating differently, or whether your double-storey design can be made efficient. I will give you a number you can act on.
           </div>
         </div>
       </div>
@@ -718,37 +798,37 @@ footer strong { color: #C8D4E3; }
 
     <div class="findings-grid">
       <div class="finding-card f-height">
-        <div class="finding-icon"> </div>
+        <div class="finding-icon">📐</div>
         <div class="finding-title">Height is the dominant lever</div>
         <div class="finding-body">Overall Height (X5) is the single strongest predictor of both Y1 and Y2. Single-storey buildings carry ~18-22 kWh/m² less heating load than equivalent double-storey designs.</div>
         <div class="finding-stat">r ≈ 0.89 with Y1 · VIF = 31.2</div>
       </div>
       <div class="finding-card f-glazing">
-        <div class="finding-icon"> </div>
+        <div class="finding-icon">🪟</div>
         <div class="finding-title">Glazing has diminishing returns</div>
         <div class="finding-body">The first 10pp increment of glazing carries the largest per-unit heating penalty (~3.8 kWh/m²). The NLS model formalises this: power law exponent b3 &lt; 1 confirms diminishing returns.</div>
         <div class="finding-stat">GAM partial: non-linear positive · b3 &lt; 1 (NLS)</div>
       </div>
       <div class="finding-card f-compact">
-        <div class="finding-icon"> </div>
+        <div class="finding-icon">📦</div>
         <div class="finding-title">Compactness has an optimal band</div>
         <div class="finding-body">The GAM partial dependence for compactness is U-shaped. The low-load range is approximately 0.73-0.79. Both very elongated and very cube-like buildings carry higher loads.</div>
         <div class="finding-stat">Optimal: 0.73-0.79 · VIF = 105.5 (collinear)</div>
       </div>
       <div class="finding-card f-orient">
-        <div class="finding-icon"> </div>
+        <div class="finding-icon">🧭</div>
         <div class="finding-title">Orientation: near-zero in simulation</div>
         <div class="finding-body">Orientation has near-zero correlation with Y1 and Y2 in this balanced simulation. Lasso confirms this by shrinking all orientation coefficients toward zero. Real East African sites are different.</div>
         <div class="finding-stat">All orientation dummies p &gt; 0.30 in GAM</div>
       </div>
       <div class="finding-card f-multi">
-        <div class="finding-icon"> </div>
+        <div class="finding-icon">🔗</div>
         <div class="finding-title">Severe multicollinearity in geometry</div>
         <div class="finding-body">X1, X2, X4 (compactness, surface area, roof area) are near-perfectly collinear by geometric constraint -- VIF exceeds 100 for all three. OLS predictions remain valid; individual coefficients do not.</div>
         <div class="finding-stat">VIF &gt; 100 for X1, X2, X4 · X'X near-singular</div>
       </div>
       <div class="finding-card f-height">
-        <div class="finding-icon"> </div>
+        <div class="finding-icon">⚡</div>
         <div class="finding-title">Height interactions are significant</div>
         <div class="finding-body">F-tests confirm significant Height x Glazing and Height x Compactness interactions. Double-storey buildings respond differently to glazing increases than single-storey buildings.</div>
         <div class="finding-stat">Height-stratified GAM RMSE 1.23 vs 1.12 (pooled)</div>
@@ -907,22 +987,22 @@ footer strong { color: #C8D4E3; }
 
     <div class="findings-grid">
       <div class="finding-card f-height">
-        <div class="finding-icon"></div>
+        <div class="finding-icon">🎯</div>
         <div class="finding-title">Purpose</div>
         <div class="finding-body">Translate GAM predictions from the ENB2012 study into actionable design decisions at concept stage -- before any structural commitments are made.</div>
       </div>
       <div class="finding-card f-glazing">
-        <div class="finding-icon"></div>
+        <div class="finding-icon">⚙️</div>
         <div class="finding-title">How predictions work</div>
-        <div class="finding-body">The assessment uses a JS approximation of the GAM's partial dependence functions. A real production deployment would call a /api/predict endpoint. Directional predictions are accurate; exact values carry ±15% margin.</div>
+        <div class="finding-body">The assessment uses a JS approximation of the GAM's partial dependence functions. A real production deployment would call a /api/predict endpoint. Directional predictions are accurate; exact values carry a ±15% margin.</div>
       </div>
       <div class="finding-card f-compact">
-        <div class="finding-icon"></div>
+        <div class="finding-icon">🤖</div>
         <div class="finding-title">The AI assistant</div>
-        <div class="finding-body">The chat assistant is powered by Claude (Anthropic). It is grounded in the study's system prompt -- all seven model families, key coefficients, and methodological caveats. It will not fabricate figures outside the study.</div>
+        <div class="finding-body">The chat assistant is powered by Groq (Llama 3.3 70B). It is grounded in the study's system prompt -- all seven model families, key coefficients, and methodological caveats. Bring your own Groq API key (free tier available).</div>
       </div>
       <div class="finding-card f-orient">
-        <div class="finding-icon"></div>
+        <div class="finding-icon">⚠️</div>
         <div class="finding-title">Limitations</div>
         <div class="finding-body">ENB2012 uses simulated data from Ecotect. No occupant behaviour, thermal mass, natural ventilation, or site-specific climate. Apply engineering judgment for real sites. Orientation effects are suppressed by simulation design balance.</div>
       </div>
@@ -958,6 +1038,26 @@ let selectedHeight  = '3.5';
 let selectedGlazing = '0';
 let chatHistory     = [];
 let lastAssessment  = null;
+let groqApiKey      = '';
+
+// ---- On load: read URL params ----
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('h'))  { setHeight(params.get('h')); }
+  if (params.has('g'))  { setGlazing(params.get('g')); }
+  if (params.has('gd')) { document.getElementById('glazingDist').value = params.get('gd'); }
+  if (params.has('c'))  { document.getElementById('compactness').value = params.get('c'); }
+  if (params.has('sa')) { document.getElementById('surfaceArea').value = params.get('sa'); }
+  if (params.has('wa')) { document.getElementById('wallArea').value = params.get('wa'); }
+  if (params.has('ra')) { document.getElementById('roofArea').value = params.get('ra'); }
+  if (params.has('or')) { document.getElementById('orientation').value = params.get('or'); }
+  if (params.has('fa')) { document.getElementById('floorArea').value = params.get('fa'); }
+  if (params.has('t'))  { document.getElementById('tariff').value = params.get('t'); }
+  if ([...params.keys()].length > 0) {
+    // Auto-run if params present
+    setTimeout(() => runModel(), 400);
+  }
+});
 
 // ---- Tab switching ----
 function switchTab(id, btn) {
@@ -980,6 +1080,41 @@ function setGlazing(g) {
   ['0','0.1','0.25','0.4'].forEach(v => {
     document.getElementById('btn-g-' + v).classList.toggle('active', v === g);
   });
+}
+
+// ---- Tariff presets ----
+function setTariff(value, btn) {
+  document.querySelectorAll('.tariff-preset').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (value > 0) {
+    document.getElementById('tariff').value = value;
+    document.getElementById('tariff').readOnly = true;
+  } else {
+    document.getElementById('tariff').value = '';
+    document.getElementById('tariff').readOnly = false;
+    document.getElementById('tariff').focus();
+  }
+}
+
+// Unlock tariff if user types manually
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('tariff').addEventListener('input', () => {
+    document.querySelectorAll('.tariff-preset').forEach(b => b.classList.remove('active'));
+    document.getElementById('tariff').readOnly = false;
+  });
+});
+
+// ---- Groq API Key ----
+function saveGroqKey() {
+  const key = document.getElementById('groqKeyInput').value.trim();
+  if (!key.startsWith('gsk_')) {
+    alert('Groq API keys start with gsk_. Please check your key.');
+    return;
+  }
+  groqApiKey = key;
+  document.getElementById('apiKeyBanner').classList.add('hidden');
+  document.getElementById('chatStatusDot').style.background = 'var(--go)';
+  addMsg('ai', 'API key saved. The chat assistant is now active. Run an assessment first, then ask your questions here.');
 }
 
 // ---- GAM approximation ----
@@ -1117,17 +1252,17 @@ function runModel() {
       verdictEl.className = 'verdict';
       if (classification.high && y1 > 25) {
         verdictEl.classList.add('bad');
-        document.getElementById('verdictIcon').textContent  = ' ';
+        document.getElementById('verdictIcon').textContent  = '🔴';
         document.getElementById('verdictLabel').textContent = 'HIGH LOAD DESIGN -- action required';
         document.getElementById('verdictText').innerHTML    = 'This design is classified <strong>high-load</strong> relative to similar ' + heightLabel.toLowerCase() + ' buildings (probability ' + Math.round(classification.prob*100) + '%). At <strong>' + y1 + ' kWh/m² heating</strong>, annual costs will be significant. The three levers below can reduce this materially.';
       } else if (classification.high) {
         verdictEl.classList.add('warn');
-        document.getElementById('verdictIcon').textContent  = ' ';
+        document.getElementById('verdictIcon').textContent  = '🟡';
         document.getElementById('verdictLabel').textContent = 'ABOVE-MEDIAN -- optimise before committing';
         document.getElementById('verdictText').innerHTML    = 'This design sits above the median for ' + heightLabel.toLowerCase() + ' buildings (probability ' + Math.round(classification.prob*100) + '%). At <strong>' + y1 + ' kWh/m² heating</strong> it is workable, but the design levers below can push it into the efficient tier at zero additional construction cost.';
       } else {
         verdictEl.classList.add('good');
-        document.getElementById('verdictIcon').textContent  = ' ';
+        document.getElementById('verdictIcon').textContent  = '🟢';
         document.getElementById('verdictLabel').textContent = 'ENERGY EFFICIENT -- within-group low load';
         document.getElementById('verdictText').innerHTML    = 'This design is classified <strong>energy-efficient</strong> relative to similar ' + heightLabel.toLowerCase() + ' buildings (probability ' + Math.round(classification.prob*100) + '% high-load). Heating load of <strong>' + y1 + ' kWh/m²</strong> is in the lower tier. Review the levers below for remaining optimisation.';
       }
@@ -1176,7 +1311,6 @@ function runModel() {
         content: 'Assessment complete. I have your building\'s full profile. Ask me anything.'
       }];
 
-      // Show context bar in chat tab
       document.getElementById('chatContextBar').classList.add('visible');
       document.getElementById('chatContextLabel').textContent =
         heightLabel + ' · ' + Math.round(params.glazing*100) + '% glazing · KES ' + annualKES.toLocaleString() + '/yr -- context loaded';
@@ -1189,6 +1323,42 @@ function runModel() {
       document.getElementById('runBtn').disabled = false;
     }
   }, 900);
+}
+
+// ---- Export PDF ----
+function exportPDF() {
+  if (!lastAssessment) return;
+  window.print();
+}
+
+// ---- Share link ----
+function shareAssessment() {
+  if (!lastAssessment) return;
+  const p = lastAssessment.params;
+  const params = new URLSearchParams({
+    h:  selectedHeight,
+    g:  selectedGlazing,
+    gd: p.glazingDist,
+    c:  p.compactness,
+    sa: p.surfaceArea,
+    wa: p.wallArea,
+    ra: p.roofArea,
+    or: p.orientation,
+    fa: lastAssessment.floorArea,
+    t:  lastAssessment.tariff
+  });
+  const url = window.location.origin + window.location.pathname + '?' + params.toString();
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('shareBtn');
+    btn.textContent = '✅ Link copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '🔗 Copy Share Link';
+      btn.classList.remove('copied');
+    }, 2500);
+  }).catch(() => {
+    prompt('Copy this link:', url);
+  });
 }
 
 // ---- Chat ----
@@ -1205,7 +1375,7 @@ WHAT YOU KNOW -- authoritative model results:
 - Bootstrap intervals (N=150) showed 24% empirical coverage vs 95% target -- NOT calibrated; use 15% engineering margin
 
 KEY EMPIRICAL FINDINGS:
-- Height is the dominant predictor (r ~0.89). Single vs double storey is the most impactful design decision.
+- Height is the dominant predictor (r approx 0.89). Single vs double storey is the most impactful design decision.
 - Compactness, Surface Area, Roof Area: VIF > 100, near-perfectly collinear. Never quote OLS coefficients for these as independent effect estimates.
 - Glazing: non-linear positive effect. First 10pp increment has largest per-unit impact (~3.8 kWh/m2); diminishing returns above 25%.
 - Orientation: near-zero correlation in this balanced simulation dataset. In real East African sites, orientation interacts with solar path.
@@ -1227,6 +1397,11 @@ async function sendChat() {
   const msg = input.value.trim();
   if (!msg) return;
 
+  if (!groqApiKey) {
+    addMsg('ai', 'Please enter your Groq API key in the field above the chat to enable the assistant.');
+    return;
+  }
+
   input.value = '';
   addMsg('user', msg);
   document.getElementById('chatSend').disabled = true;
@@ -1234,14 +1409,19 @@ async function sendChat() {
   chatHistory.push({ role: 'user', content: msg });
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + groqApiKey
+      },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: chatHistory
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...chatHistory
+        ]
       })
     });
 
@@ -1251,16 +1431,18 @@ async function sendChat() {
     }
 
     const data = await response.json();
-    const reply = data.content?.map(b => b.text || '').join('') || 'No response received.';
+    const reply = data.choices?.[0]?.message?.content || 'No response received.';
     chatHistory.push({ role: 'assistant', content: reply });
     addMsg('ai', reply);
   } catch (e) {
-    // Check if it's a CORS/network error
-    const msg = e.message || '';
-    if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('CORS')) {
-      addMsg('ai', '<strong>Note:</strong> The Anthropic API cannot be called directly from a browser due to CORS policy. To enable the chat, deploy a lightweight proxy endpoint (e.g. a Vercel serverless function at /api/chat that forwards requests server-side with your API key). The assessment tool above works fully without an API call.');
+    const errMsg = e.message || '';
+    if (errMsg.includes('401') || errMsg.includes('invalid_api_key') || errMsg.includes('Incorrect API key')) {
+      addMsg('ai', 'Invalid API key. Please check your Groq key at console.groq.com and re-enter it above.');
+      groqApiKey = '';
+      document.getElementById('apiKeyBanner').classList.remove('hidden');
+      document.getElementById('chatStatusDot').style.background = '#8A9BB0';
     } else {
-      addMsg('ai', 'API error: ' + (e.message || 'Unknown error. Check your API key and network connection.'));
+      addMsg('ai', 'Error: ' + (e.message || 'Unknown error. Check your network connection and API key.'));
     }
   } finally {
     document.getElementById('chatSend').disabled = false;
