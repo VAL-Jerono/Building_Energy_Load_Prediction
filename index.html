@@ -411,16 +411,16 @@ footer strong { color: #C8D4E3; }
 <!-- Tab Nav -->
 <nav class="tab-nav" role="tablist">
   <button class="tab-btn active" role="tab" onclick="switchTab('assess', this)">
-    <span class="tab-icon">⚡</span> Assessment
+    <span class="tab-icon"> </span> Assessment
   </button>
   <button class="tab-btn" role="tab" onclick="switchTab('chat', this)">
-    <span class="tab-icon">💬</span> Ask the Engineer
+    <span class="tab-icon"> </span> Ask the Engineer
   </button>
   <button class="tab-btn" role="tab" onclick="switchTab('study', this)">
-    <span class="tab-icon">📊</span> Study Results
+    <span class="tab-icon"> </span> Study Results
   </button>
   <button class="tab-btn" role="tab" onclick="switchTab('about', this)">
-    <span class="tab-icon">ℹ</span> About
+    <span class="tab-icon"> </span> About
   </button>
 </nav>
 
@@ -718,37 +718,37 @@ footer strong { color: #C8D4E3; }
 
     <div class="findings-grid">
       <div class="finding-card f-height">
-        <div class="finding-icon">📐</div>
+        <div class="finding-icon"> </div>
         <div class="finding-title">Height is the dominant lever</div>
         <div class="finding-body">Overall Height (X5) is the single strongest predictor of both Y1 and Y2. Single-storey buildings carry ~18-22 kWh/m² less heating load than equivalent double-storey designs.</div>
         <div class="finding-stat">r ≈ 0.89 with Y1 · VIF = 31.2</div>
       </div>
       <div class="finding-card f-glazing">
-        <div class="finding-icon">🪟</div>
+        <div class="finding-icon"> </div>
         <div class="finding-title">Glazing has diminishing returns</div>
         <div class="finding-body">The first 10pp increment of glazing carries the largest per-unit heating penalty (~3.8 kWh/m²). The NLS model formalises this: power law exponent b3 &lt; 1 confirms diminishing returns.</div>
         <div class="finding-stat">GAM partial: non-linear positive · b3 &lt; 1 (NLS)</div>
       </div>
       <div class="finding-card f-compact">
-        <div class="finding-icon">🔷</div>
+        <div class="finding-icon"> </div>
         <div class="finding-title">Compactness has an optimal band</div>
         <div class="finding-body">The GAM partial dependence for compactness is U-shaped. The low-load range is approximately 0.73-0.79. Both very elongated and very cube-like buildings carry higher loads.</div>
         <div class="finding-stat">Optimal: 0.73-0.79 · VIF = 105.5 (collinear)</div>
       </div>
       <div class="finding-card f-orient">
-        <div class="finding-icon">🧭</div>
+        <div class="finding-icon"> </div>
         <div class="finding-title">Orientation: near-zero in simulation</div>
         <div class="finding-body">Orientation has near-zero correlation with Y1 and Y2 in this balanced simulation. Lasso confirms this by shrinking all orientation coefficients toward zero. Real East African sites are different.</div>
         <div class="finding-stat">All orientation dummies p &gt; 0.30 in GAM</div>
       </div>
       <div class="finding-card f-multi">
-        <div class="finding-icon">📉</div>
+        <div class="finding-icon"> </div>
         <div class="finding-title">Severe multicollinearity in geometry</div>
         <div class="finding-body">X1, X2, X4 (compactness, surface area, roof area) are near-perfectly collinear by geometric constraint -- VIF exceeds 100 for all three. OLS predictions remain valid; individual coefficients do not.</div>
         <div class="finding-stat">VIF &gt; 100 for X1, X2, X4 · X'X near-singular</div>
       </div>
       <div class="finding-card f-height">
-        <div class="finding-icon">🔀</div>
+        <div class="finding-icon"> </div>
         <div class="finding-title">Height interactions are significant</div>
         <div class="finding-body">F-tests confirm significant Height x Glazing and Height x Compactness interactions. Double-storey buildings respond differently to glazing increases than single-storey buildings.</div>
         <div class="finding-stat">Height-stratified GAM RMSE 1.23 vs 1.12 (pooled)</div>
@@ -907,22 +907,22 @@ footer strong { color: #C8D4E3; }
 
     <div class="findings-grid">
       <div class="finding-card f-height">
-        <div class="finding-icon">🎯</div>
+        <div class="finding-icon"></div>
         <div class="finding-title">Purpose</div>
         <div class="finding-body">Translate GAM predictions from the ENB2012 study into actionable design decisions at concept stage -- before any structural commitments are made.</div>
       </div>
       <div class="finding-card f-glazing">
-        <div class="finding-icon">⚙</div>
+        <div class="finding-icon"></div>
         <div class="finding-title">How predictions work</div>
         <div class="finding-body">The assessment uses a JS approximation of the GAM's partial dependence functions. A real production deployment would call a /api/predict endpoint. Directional predictions are accurate; exact values carry ±15% margin.</div>
       </div>
       <div class="finding-card f-compact">
-        <div class="finding-icon">🤖</div>
+        <div class="finding-icon"></div>
         <div class="finding-title">The AI assistant</div>
         <div class="finding-body">The chat assistant is powered by Claude (Anthropic). It is grounded in the study's system prompt -- all seven model families, key coefficients, and methodological caveats. It will not fabricate figures outside the study.</div>
       </div>
       <div class="finding-card f-orient">
-        <div class="finding-icon">⚠</div>
+        <div class="finding-icon"></div>
         <div class="finding-title">Limitations</div>
         <div class="finding-body">ENB2012 uses simulated data from Ecotect. No occupant behaviour, thermal mass, natural ventilation, or site-specific climate. Apply engineering judgment for real sites. Orientation effects are suppressed by simulation design balance.</div>
       </div>
@@ -1117,17 +1117,17 @@ function runModel() {
       verdictEl.className = 'verdict';
       if (classification.high && y1 > 25) {
         verdictEl.classList.add('bad');
-        document.getElementById('verdictIcon').textContent  = '⚠';
+        document.getElementById('verdictIcon').textContent  = ' ';
         document.getElementById('verdictLabel').textContent = 'HIGH LOAD DESIGN -- action required';
         document.getElementById('verdictText').innerHTML    = 'This design is classified <strong>high-load</strong> relative to similar ' + heightLabel.toLowerCase() + ' buildings (probability ' + Math.round(classification.prob*100) + '%). At <strong>' + y1 + ' kWh/m² heating</strong>, annual costs will be significant. The three levers below can reduce this materially.';
       } else if (classification.high) {
         verdictEl.classList.add('warn');
-        document.getElementById('verdictIcon').textContent  = '⚡';
+        document.getElementById('verdictIcon').textContent  = ' ';
         document.getElementById('verdictLabel').textContent = 'ABOVE-MEDIAN -- optimise before committing';
         document.getElementById('verdictText').innerHTML    = 'This design sits above the median for ' + heightLabel.toLowerCase() + ' buildings (probability ' + Math.round(classification.prob*100) + '%). At <strong>' + y1 + ' kWh/m² heating</strong> it is workable, but the design levers below can push it into the efficient tier at zero additional construction cost.';
       } else {
         verdictEl.classList.add('good');
-        document.getElementById('verdictIcon').textContent  = '✓';
+        document.getElementById('verdictIcon').textContent  = ' ';
         document.getElementById('verdictLabel').textContent = 'ENERGY EFFICIENT -- within-group low load';
         document.getElementById('verdictText').innerHTML    = 'This design is classified <strong>energy-efficient</strong> relative to similar ' + heightLabel.toLowerCase() + ' buildings (probability ' + Math.round(classification.prob*100) + '% high-load). Heating load of <strong>' + y1 + ' kWh/m²</strong> is in the lower tier. Review the levers below for remaining optimisation.';
       }
