@@ -654,7 +654,7 @@ footer strong { color: #C8D4E3; }
     </div>
 
     <!-- API Key entry -->
-    <div class="api-key-banner" id="apiKeyBanner">
+    <div class="api-key-banner hidden" id="apiKeyBanner">
       <div style="font-size:1.3rem;flex-shrink:0">🔑</div>
       <div style="flex:1">
         <p><strong>Enter your Groq API key to enable the chat assistant.</strong> Get a free key at <a href="https://console.groq.com" target="_blank" style="color:var(--warn);font-weight:600">console.groq.com</a>. Your key stays in this browser session only and is never stored.</p>
@@ -1038,10 +1038,11 @@ let selectedHeight  = '3.5';
 let selectedGlazing = '0';
 let chatHistory     = [];
 let lastAssessment  = null;
-let groqApiKey      = '';
+let groqApiKey      = 'proxy'; // handled server-side via /api/chat
 
 // ---- On load: read URL params ----
 window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('chatStatusDot').style.background = 'var(--go)';
   const params = new URLSearchParams(window.location.search);
   if (params.has('h'))  { setHeight(params.get('h')); }
   if (params.has('g'))  { setGlazing(params.get('g')); }
@@ -1397,11 +1398,6 @@ async function sendChat() {
   const msg = input.value.trim();
   if (!msg) return;
 
-  if (!groqApiKey) {
-    addMsg('ai', 'Please enter your Groq API key in the field above the chat to enable the assistant.');
-    return;
-  }
-
   input.value = '';
   addMsg('user', msg);
   document.getElementById('chatSend').disabled = true;
@@ -1409,11 +1405,10 @@ async function sendChat() {
   chatHistory.push({ role: 'user', content: msg });
 
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + groqApiKey
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
@@ -1435,15 +1430,7 @@ async function sendChat() {
     chatHistory.push({ role: 'assistant', content: reply });
     addMsg('ai', reply);
   } catch (e) {
-    const errMsg = e.message || '';
-    if (errMsg.includes('401') || errMsg.includes('invalid_api_key') || errMsg.includes('Incorrect API key')) {
-      addMsg('ai', 'Invalid API key. Please check your Groq key at console.groq.com and re-enter it above.');
-      groqApiKey = '';
-      document.getElementById('apiKeyBanner').classList.remove('hidden');
-      document.getElementById('chatStatusDot').style.background = '#8A9BB0';
-    } else {
-      addMsg('ai', 'Error: ' + (e.message || 'Unknown error. Check your network connection and API key.'));
-    }
+    addMsg('ai', 'Error: ' + (e.message || 'Unknown error. Check your network connection.'));
   } finally {
     document.getElementById('chatSend').disabled = false;
   }
